@@ -6,5 +6,5 @@ export interface neuron {
   strokeWidth: number;
   strokeColor: string;
   bgColor: string;
-  args: {};
+  args: {}; // needed to easily identify a specific subset of neurons for effects
 }

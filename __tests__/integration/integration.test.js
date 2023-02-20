@@ -1,4 +1,4 @@
-import { BasePainter } from "../";
+import { BasePainter } from "..";
 import puppeteer from "puppeteer";
 
 describe("Tests Base painter functionality in the context of a react app", () => {

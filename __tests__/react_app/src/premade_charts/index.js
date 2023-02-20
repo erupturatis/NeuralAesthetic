@@ -1,1 +1,1 @@
-import { add } from "../../src";
+import { add } from "../../src  ";
