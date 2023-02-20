@@ -47,6 +47,6 @@ export class BasePainter {
   }
 
   assignRandomPosition() {
-    assignRandomPositions(this.neurons, min, max);
+    assignRandomPositions(this.neurons, this.min, this.max);
   }
 }
