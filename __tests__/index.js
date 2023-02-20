@@ -1,2 +1,1 @@
-import { add } from "../src";
-export { add };
+import { BasePainter } from "../src/Utils/index";

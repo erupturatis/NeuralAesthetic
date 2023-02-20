@@ -1,7 +1,7 @@
-import { add } from "../";
+import { BasePainter } from "../";
 
-describe("testing basic functionalities", () => {
-  test("first test", () => {
+describe("Tests Base Painter positioning functionalities", () => {
+  test("", () => {
     expect(add(1, 2)).toBe(3);
   });
 });

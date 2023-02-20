@@ -1,17 +1,13 @@
 import { neuron } from "src/interfaces/interface";
 import { assignRandomPositions, generateNeuron } from "./generator";
 
-export const add = (a: number, b: number): number => {
-  return a + b;
-};
-
 interface posObject {
   index: number;
   posX: number;
   posY: number;
 }
 
-class BasePainter {
+export class BasePainter {
   running: boolean;
   neurons: neuron[]; // keeping the index equal to the arr index,
   // since the neuron number will not change much if at all
