@@ -19,6 +19,6 @@ describe("Tests Base painter functionality in the context of a react app", () =>
     await page.goto("http://localhost:5173"); // vite default port
     const svg = await page.$("#root-svg");
     console.log(svg);
-    const mySvg = new BasePainter();
+    const mySvg = new BasePainter(svg);
   });
 });
