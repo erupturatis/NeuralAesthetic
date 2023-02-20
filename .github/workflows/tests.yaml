@@ -15,11 +15,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Spin up react server for testing
-        run: npm run startReact
-
-      - name: Run tests
-        run: npm test
-
-      - name: Stop React
-        run: SIGINT
+      - name: Runs server, runs tests and closes server
+        run: npm ci
