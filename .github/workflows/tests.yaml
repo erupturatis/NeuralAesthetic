@@ -15,5 +15,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Runs server, runs tests and closes server
-        run: npm ci
+      - name: runs tests
+        run: npm test

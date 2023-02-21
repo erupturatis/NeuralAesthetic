@@ -3,25 +3,27 @@ import { neuron } from "src/interfaces/interface";
 export const generateNeuron = (): neuron => {
   let neuron: neuron = {
     index: -1,
-    posX: -1,
-    posY: -1,
-    radius: -1,
-    strokeWidth: -1,
-    strokeColor: "",
-    bgColor: "",
-    args: {},
+    posX: 0,
+    posY: 0,
+    radius: 10,
+    strokeWidth: 1,
+    strokeColor: "black",
+    bgColor: "white",
+    flags: {},
   };
   return neuron;
 };
 
 export const assignRandomPositions = (
   neuronsList: neuron[],
-  min: number,
-  max: number
+  minX: number,
+  maxX: number,
+  minY: number,
+  maxY: number
 ): void => {
   for (let neuron of neuronsList) {
-    neuron.posY = rand(min, max);
-    neuron.posY = rand(min, max);
+    neuron.posX = rand(minX, maxX);
+    neuron.posY = rand(minY, maxY);
   }
 };
 

@@ -14,3 +14,6 @@
 .big {
   height: 500px;
 }
+body {
+  margin: 0px !important;
+}
