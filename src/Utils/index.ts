@@ -109,6 +109,26 @@ export class BasePainter {
   arrangeInLayers(params: layerParams, ...args: number[]) {
     // arranges existent neurons in layers
     // the network will be centered around in the middle of the svg or group
+
+    // calculating X positions based on layerDistance
+    let unit: number = params.distanceLayers;
+    let neuronUnit: number = params.distanceNeurons;
+    let middle: number = (args.length - 1) / 2;
+    let neuronIdx = 0;
+    for (let idx: number = 0; idx < args.length; idx += 1) {
+      // keeping index of neurons because they should be in order
+      let layerNr = 0;
+      for (; layerNr < args[idx]; layerNr += 1) {
+        let layerMiddle = (args[idx] - 1) / 2;
+
+        this.neurons[neuronIdx + layerNr].flags["layer"] = idx;
+        this.neurons[neuronIdx + layerNr].flags["layerIdx"] = layerNr;
+        //formula for centering the neurons in the svg
+        this.neurons[neuronIdx + layerNr].posX = unit * (idx - middle);
+        this.neurons[neuronIdx + layerNr].posY = unit * (layerNr - layerMiddle);
+      }
+      neuronIdx += layerNr;
+    }
   }
 
   calculateSVGSizes() {

@@ -7,19 +7,19 @@ describe("tests generation of neurons positions", () => {
     expect(paint.neurons.length).toBe(10);
   });
 
-  // test("test layer positions", () => {
-  //   //
-  //   const paint = new BasePainter();
-  //   let params = {
-  //     distanceNeurons: 12,
-  //     distanceLayers: 20,
-  //   };
+  test("test layer positions", () => {
+    //
+    const paint = new BasePainter(null, true);
+    let params = {
+      distanceNeurons: 12,
+      distanceLayers: 20,
+    };
 
-  //   paint.generateNeuronLayers(params, 2, 3, 5, 5);
+    paint.generateNeuronLayers(params, 2, 3, 5, 5);
 
-  //   expect(paint.neurons.length).toBe(16);
-  //   expect(paint.neurons[2].args["layer"]).toBe(1); // layers indexed from 0
-  // });
+    expect(paint.neurons.length).toBe(15);
+    expect(paint.neurons[2].flags["layer"]).toBe(1); // layers indexed from 0
+  });
 
   test("test arguments adding", () => {
     const paint = new BasePainter(null, true);
