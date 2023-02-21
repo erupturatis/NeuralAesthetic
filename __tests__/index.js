@@ -1,2 +1,1 @@
-import { add } from "../src";
-export { add };
+export { generateNeuron, assignRandomPositions, BasePainter } from "../src";

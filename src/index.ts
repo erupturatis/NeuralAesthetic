@@ -1,2 +1,3 @@
 // here we will export everything in the library
-export { add } from "./Utils/index";
+export { BasePainter } from "./Utils/index";
+export { generateNeuron, assignRandomPositions } from "./Utils/generator";

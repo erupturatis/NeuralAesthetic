@@ -6,5 +6,15 @@ export interface neuron {
   strokeWidth: number;
   strokeColor: string;
   bgColor: string;
-  args: {};
+  flags: { [key: string]: any }; // needed to easily identify a specific subset of neurons for effects
+}
+
+export interface layerParams {
+  distanceNeurons: number;
+  distanceLayers: number;
+}
+
+export interface coord {
+  x: number;
+  y: number;
 }
