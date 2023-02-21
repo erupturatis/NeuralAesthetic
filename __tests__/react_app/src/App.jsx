@@ -6,7 +6,8 @@ function App() {
     let paint = new BasePainter(document.querySelector("#root-svg"));
     console.log(paint);
   }, []);
-
+  // integration testing will be done manually here, will set up some tests
+  // later probably in this react app to run along with the normal tests
   return (
     <div className="App big">
       <div className="full-size ">
