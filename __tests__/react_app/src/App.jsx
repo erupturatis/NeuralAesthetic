@@ -12,7 +12,7 @@ function App() {
       6
     );
     paint.positionUpdater = shiftNeurons;
-    paint.startRendering(100);
+    paint.startRendering(10);
   }, []);
 
   // integration testing will be done manually here, will set up some tests

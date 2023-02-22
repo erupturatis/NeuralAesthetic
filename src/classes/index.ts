@@ -20,6 +20,8 @@ class Params {
 
   running = false;
   refresh = false;
+
+  checkSvg = true;
 }
 export class BasePainter extends Params {
   running: boolean;
@@ -192,26 +194,6 @@ export class BasePainter extends Params {
         return el.strokeWidth;
       });
   }
-
-  transitionNeurons() {
-    // transitions the neurons to their new positions
-
-    d3.select(this.svgElement)
-      .selectAll("circle")
-      .data(this.neurons, (el: any): number => {
-        return el.index;
-        // return the index of the neuron
-      })
-      .transition()
-      .duration(1000)
-      .attr("cx", (el: neuron) => {
-        return el.posX + this.center.x;
-      })
-      .attr("cy", (el: neuron) => {
-        return el.posY + this.center.y;
-      });
-  }
-
   applyPositions() {
     // applies newPos to pos for all neurons
     for (let neuron of this.neurons) {
@@ -237,7 +219,7 @@ export class BasePainter extends Params {
   }
   async checkSvgSize() {
     // if svg size changes, we need to recalculate the center with the calculateSVGSizes function
-    while (true) {
+    while (true && this.checkSvg) {
       await delay(50);
       if (this.running) {
         const rect = this.svgElement.getBoundingClientRect();
@@ -248,6 +230,13 @@ export class BasePainter extends Params {
           this.instantTransition();
         }
       }
+    }
+  }
+
+  terminateWorkers() {
+    // terminates the workers
+    for (let worker of this.workers) {
+      worker.terminate();
     }
   }
 }
@@ -267,14 +256,35 @@ export class TransitionNetwork extends BasePainter {
     super(htmlElement);
   }
 
+  transitionNeurons() {
+    // transitions the neurons to their new positions
+
+    d3.select(this.svgElement)
+      .selectAll("circle")
+      .data(this.neurons, (el: any): number => {
+        return el.index;
+        // return the index of the neuron
+      })
+      .transition()
+      .duration(this.transitionTime)
+      .attr("cx", (el: neuron) => {
+        return el.posX + this.center.x;
+      })
+      .attr("cy", (el: neuron) => {
+        return el.posY + this.center.y;
+      });
+  }
+
   async startRendering(iterations?: number) {
     // draws the initial neurons applying the properties
     this.calculateSVGSizes();
+
     this.checkSvgSize();
+
     this.drawInitialNeurons();
     this.running = true;
     // starts the render loop
-    while (true && (iterations === undefined || iterations-- > 0)) {
+    while (iterations === undefined || iterations-- > 0) {
       //the new positions will be calculated
       this.positionUpdater(this.neurons);
       // applies the new positions

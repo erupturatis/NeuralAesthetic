@@ -75,7 +75,7 @@ describe("tests generation of neurons positions", () => {
     expect(paint.neurons[1].bgColor).toBe("green");
   });
 
-  test("TransitionNetwork", () => {
+  test("TransitionNetwork", async () => {
     const paint = new TransitionNetwork(svg);
     let params = {
       distanceNeurons: 12,
@@ -84,9 +84,11 @@ describe("tests generation of neurons positions", () => {
 
     paint.generateNeuronLayers(params, 2, 3, 5, 5);
     expect(paint.neurons.length).toBe(15);
+    paint.transitionInterval = 0;
     paint.transitionTime = 0;
     paint.positionUpdater = shiftNeurons;
-    paint.startRendering(1); // 1 iteration
+    await paint.startRendering(1); // 1 iteration
+    paint.checkSvg = false;
     expect(paint.neurons[0].posX).toBe(paint.neurons[14].posX);
     expect(paint.neurons[0].posY).toBe(10);
   });
