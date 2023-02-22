@@ -14,8 +14,14 @@ interface posObject {
   posX: number;
   posY: number;
 }
+class Params {
+  svgWidth: number = 0;
+  svgHeight: number = 0;
 
-export class BasePainter {
+  running = false;
+  refresh = false;
+}
+export class BasePainter extends Params {
   running: boolean;
   neurons: neuron[]; // keeping the index equal to the arr index,
   // since the neuron number will not change much if at all
@@ -30,14 +36,13 @@ export class BasePainter {
     y: 0,
   };
 
-  constructor(htmlElement: SVGSVGElement, debug?: boolean) {
+  constructor(htmlElement: SVGSVGElement) {
+    super();
     this.neurons = [];
     this.running = false;
     this.svgElement = htmlElement;
-    if (!debug) {
-      // if debugging we might need to test only some of the internal functions without an actual svg
-      this.calculateSVGSizes();
-    }
+
+    this.calculateSVGSizes();
   }
 
   set neuronRadius(value: number) {
@@ -147,6 +152,9 @@ export class BasePainter {
     const width = rect.width;
     const height = rect.height;
 
+    this.svgWidth = width;
+    this.svgHeight = height;
+
     this.minX = 0;
     this.maxX = width;
 
@@ -187,6 +195,7 @@ export class BasePainter {
 
   transitionNeurons() {
     // transitions the neurons to their new positions
+
     d3.select(this.svgElement)
       .selectAll("circle")
       .data(this.neurons, (el: any): number => {
@@ -210,12 +219,42 @@ export class BasePainter {
       neuron.posY = neuron.newPosY;
     }
   }
-}
+  instantTransition() {
+    // same as transitionNeurons but without the transition
+    d3.select(this.svgElement)
 
+      .selectAll("circle")
+      .data(this.neurons, (el: any): number => {
+        return el.index;
+        // return the index of the neuron
+      })
+      .attr("cx", (el: neuron) => {
+        return el.posX + this.center.x;
+      })
+      .attr("cy", (el: neuron) => {
+        return el.posY + this.center.y;
+      });
+  }
+  async checkSvgSize() {
+    // if svg size changes, we need to recalculate the center with the calculateSVGSizes function
+    while (true) {
+      await delay(50);
+      if (this.running) {
+        const rect = this.svgElement.getBoundingClientRect();
+        if (rect.width != this.svgWidth || rect.height != this.svgHeight) {
+          this.calculateSVGSizes();
+          /* since the network in already running, we need to transition the neurons to their new positions
+         relattive to the new center */
+          this.instantTransition();
+        }
+      }
+    }
+  }
+}
 // the program will have a physics based implementation and an transition based implementation
 export class PhysicsNetwork extends BasePainter {
-  constructor(htmlElement: SVGSVGElement, debug?: boolean) {
-    super(htmlElement, debug);
+  constructor(htmlElement: SVGSVGElement) {
+    super(htmlElement);
   }
 }
 
@@ -224,13 +263,16 @@ export class TransitionNetwork extends BasePainter {
   transitionInterval: number = 2000; // the time between the transitions
   positionUpdater: posUpdater = (neurons: neuron[]) => {}; // gets called to set next transition positions
 
-  constructor(htmlElement: SVGSVGElement, debug?: boolean) {
-    super(htmlElement, debug);
+  constructor(htmlElement: SVGSVGElement) {
+    super(htmlElement);
   }
 
   async startRendering(iterations?: number) {
     // draws the initial neurons applying the properties
+    this.calculateSVGSizes();
+    this.checkSvgSize();
     this.drawInitialNeurons();
+    this.running = true;
     // starts the render loop
     while (true && (iterations === undefined || iterations-- > 0)) {
       //the new positions will be calculated
@@ -242,6 +284,7 @@ export class TransitionNetwork extends BasePainter {
       // in the transition network the neurons will be moved to their new positions
       this.transitionNeurons();
     }
+    this.running = false;
     // write code for drawing the neurons
   }
 }

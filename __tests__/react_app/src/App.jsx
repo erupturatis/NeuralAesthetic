@@ -5,14 +5,14 @@ function App() {
   useEffect(() => {
     let paint = new TransitionNetwork(document.querySelector("#root-svg"));
     paint.generateNeuronLayers(
-      { distanceLayers: 25, distanceNeurons: 25, layers: 3 },
+      { distanceLayers: 50, distanceNeurons: 50, layers: 3 },
       2,
       3,
       5,
-      5
+      6
     );
     paint.positionUpdater = shiftNeurons;
-    paint.startRendering(4);
+    paint.startRendering(100);
   }, []);
 
   // integration testing will be done manually here, will set up some tests

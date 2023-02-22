@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import {
   assignRandomPositions,
   generateNeuron,
@@ -7,15 +8,41 @@ import {
 } from "..";
 
 describe("tests generation of neurons positions", () => {
+  let dom;
+  let svg;
+  beforeAll(() => {
+    dom = new JSDOM(`<!DOCTYPE html><html><body></body></html>`);
+    svg = createMockSvg(1000, 500);
+    dom.window.document.body.appendChild(svg);
+  });
+
+  function createMockSvg(width, height) {
+    const svg = dom.window.document.createElement("svg");
+    Object.assign(svg.style, {
+      width: width + "px",
+      height: height + "px",
+    });
+    // we have to mock this for jsdom.
+    svg.getBoundingClientRect = () => ({
+      width,
+      height,
+      top: 0,
+      left: 0,
+      right: width,
+      bottom: height,
+    });
+    return svg;
+  }
+
   test("test random positions", () => {
-    const paint = new BasePainter(null, true);
+    const paint = new BasePainter(svg);
     paint.generateNeurons(10);
     expect(paint.neurons.length).toBe(10);
   });
 
   test("test layer positions", () => {
     //
-    const paint = new BasePainter(null, true);
+    const paint = new BasePainter(svg);
     let params = {
       distanceNeurons: 12,
       distanceLayers: 20,
@@ -28,7 +55,7 @@ describe("tests generation of neurons positions", () => {
   });
 
   test("test arguments adding", () => {
-    const paint = new BasePainter(null, true);
+    const paint = new BasePainter(svg);
     paint.generateNeurons(10);
     paint.addArg(5, "customArg", 23);
 
@@ -36,7 +63,7 @@ describe("tests generation of neurons positions", () => {
   });
 
   test("setters for neuron props", () => {
-    const paint = new BasePainter(null, true);
+    const paint = new BasePainter(svg);
     paint.generateNeurons(12);
     paint.neuronRadius = 23;
     expect(paint.neurons[3].radius).toBe(23);
@@ -49,7 +76,7 @@ describe("tests generation of neurons positions", () => {
   });
 
   test("TransitionNetwork", () => {
-    const paint = new TransitionNetwork(null, true);
+    const paint = new TransitionNetwork(svg);
     let params = {
       distanceNeurons: 12,
       distanceLayers: 20,
