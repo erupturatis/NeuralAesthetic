@@ -1,4 +1,9 @@
-import { assignRandomPositions, generateNeuron, BasePainter } from "..";
+import {
+  assignRandomPositions,
+  generateNeuron,
+  BasePainter,
+  TransitionNetwork,
+} from "..";
 
 describe("tests generation of neurons positions", () => {
   test("test random positions", () => {
@@ -40,5 +45,14 @@ describe("tests generation of neurons positions", () => {
     expect(paint.neurons[5].strokeColor).toBe("red");
     paint.bgColor = "green";
     expect(paint.neurons[1].bgColor).toBe("green");
+  });
+
+  test("TransitionNetwork", () => {
+    const paint = new TransitionNetwork(null, true);
+    paint.arrangeInLayers(2, 3, 5, 5);
+    expect(paint.neurons.length).toBe(15);
+    paint.transitionTime = 0;
+    paint.startRendering(1); // 1 iteration
+    expect(paint.neurons[0].pos);
   });
 });

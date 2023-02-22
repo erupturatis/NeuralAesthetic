@@ -1,6 +1,13 @@
-import { layerParams, neuron, coord } from "src/interfaces/interface";
+import { delay } from "../Utils/general";
+import {
+  layerParams,
+  neuron,
+  coord,
+  posUpdater,
+} from "../interfaces/interface";
+import * as d3 from "d3";
 
-import { assignRandomPositions, generateNeuron } from "./generator";
+import { assignRandomPositions, generateNeuron } from "../Utils/generator";
 
 interface posObject {
   index: number;
@@ -147,5 +154,95 @@ export class BasePainter {
     this.maxY = height;
     this.center.x = (this.maxX + this.minX) / 2;
     this.center.y = (this.maxY + this.minY) / 2;
+  }
+  drawInitialNeurons() {
+    // draws the neurons
+
+    d3.select(this.svgElement)
+      .selectAll("circle")
+      .data(this.neurons, (el: any): number => {
+        return el.index;
+        // return the index of the neuron
+      })
+      .enter()
+      .append("circle")
+      .attr("r", (el: neuron) => {
+        return el.radius;
+      })
+      .attr("cx", (el: neuron) => {
+        return el.posX;
+      })
+      .attr("cy", (el: neuron) => {
+        return el.posY;
+      })
+      .attr("fill", (el: neuron) => {
+        return el.bgColor;
+      })
+      .attr("stroke", (el: neuron) => {
+        return el.strokeColor;
+      })
+      .attr("stroke-width", (el: neuron) => {
+        return el.strokeWidth;
+      });
+  }
+
+  transitionNeurons() {
+    // transitions the neurons to their new positions
+    d3.select(this.svgElement)
+      .selectAll("circle")
+      .data(this.neurons, (el: any): number => {
+        return el.index;
+        // return the index of the neuron
+      })
+      .transition()
+      .duration(1000)
+      .attr("cx", (el: neuron) => {
+        return el.posX;
+      })
+      .attr("cy", (el: neuron) => {
+        return el.posY;
+      });
+  }
+
+  applyPositions() {
+    // applies newPos to pos for all neurons
+    for (let neuron of this.neurons) {
+      neuron.posX = neuron.newPosX;
+      neuron.posY = neuron.newPosY;
+    }
+  }
+}
+
+// the program will have a physics based implementation and an transition based implementation
+export class PhysicsNetwork extends BasePainter {
+  constructor(htmlElement: SVGSVGElement, debug?: boolean) {
+    super(htmlElement, debug);
+  }
+}
+
+export class TransitionNetwork extends BasePainter {
+  transitionTime: number = 500;
+  transitionInterval: number = 2000; // the time between the transitions
+  positionUpdater: posUpdater = (neurons: neuron[]) => {}; // gets called to set next transition positions
+
+  constructor(htmlElement: SVGSVGElement, debug?: boolean) {
+    super(htmlElement, debug);
+  }
+
+  async startRendering(iterations?: number) {
+    // draws the initial neurons applying the properties
+    this.drawInitialNeurons();
+    // starts the render loop
+    while (true && (iterations === undefined || iterations-- > 0)) {
+      //the new positions will be calculated
+      this.positionUpdater(this.neurons);
+      // applies the new positions
+      this.applyPositions();
+      // sleep for transitionInterval
+      await delay(this.transitionInterval);
+      // in the transition network the neurons will be moved to their new positions
+      this.transitionNeurons();
+    }
+    // write code for drawing the neurons
   }
 }
