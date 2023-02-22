@@ -1,1 +1,8 @@
-export { generateNeuron, assignRandomPositions, BasePainter } from "../src";
+export {
+  generateNeuron,
+  assignRandomPositions,
+  BasePainter,
+  PhysicsNetwork,
+  TransitionNetwork,
+  shiftNeurons,
+} from "../src";

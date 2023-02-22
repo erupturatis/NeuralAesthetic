@@ -2,6 +2,8 @@ export interface neuron {
   index: number;
   posX: number;
   posY: number;
+  newPosX: number;
+  newPosY: number;
   radius: number;
   strokeWidth: number;
   strokeColor: string;
@@ -18,3 +20,5 @@ export interface coord {
   x: number;
   y: number;
 }
+
+export type posUpdater = (neurons: neuron[]) => void;

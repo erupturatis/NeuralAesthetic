@@ -3,8 +3,11 @@ import { BasePainter } from "../../src";
 
 describe("test integration ", () => {
   let dom;
+  let svg;
   beforeAll(() => {
     dom = new JSDOM(`<!DOCTYPE html><html><body></body></html>`);
+    svg = createMockSvg(1000, 500);
+    dom.window.document.body.appendChild(svg);
   });
 
   function createMockSvg(width, height) {
@@ -26,8 +29,6 @@ describe("test integration ", () => {
   }
 
   test("setters for neuron props", () => {
-    let svg = createMockSvg(1000, 500);
-    dom.window.document.body.appendChild(svg);
     let painter = new BasePainter(svg);
 
     expect(painter.center.x).toBe(500);

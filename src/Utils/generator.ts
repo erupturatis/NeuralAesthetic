@@ -1,10 +1,12 @@
-import { neuron } from "src/interfaces/interface";
+import { neuron } from "../interfaces/interface";
 
 export const generateNeuron = (): neuron => {
   let neuron: neuron = {
     index: -1,
     posX: 0,
     posY: 0,
+    newPosX: 0,
+    newPosY: 0,
     radius: 10,
     strokeWidth: 1,
     strokeColor: "black",
