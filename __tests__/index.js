@@ -4,4 +4,5 @@ export {
   BasePainter,
   PhysicsNetwork,
   TransitionNetwork,
+  shiftNeurons,
 } from "../src";

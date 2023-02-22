@@ -1,11 +1,20 @@
 import { useEffect } from "react";
-import { BasePainter } from "../../";
+import { shiftNeurons, TransitionNetwork } from "../../";
 
 function App() {
   useEffect(() => {
-    let paint = new BasePainter(document.querySelector("#root-svg"));
-    console.log(paint);
+    let paint = new TransitionNetwork(document.querySelector("#root-svg"));
+    paint.generateNeuronLayers(
+      { distanceLayers: 25, distanceNeurons: 25, layers: 3 },
+      2,
+      3,
+      5,
+      5
+    );
+    paint.positionUpdater = shiftNeurons;
+    paint.startRendering(4);
   }, []);
+
   // integration testing will be done manually here, will set up some tests
   // later probably in this react app to run along with the normal tests
   return (

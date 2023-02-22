@@ -3,6 +3,7 @@ import {
   generateNeuron,
   BasePainter,
   TransitionNetwork,
+  shiftNeurons,
 } from "..";
 
 describe("tests generation of neurons positions", () => {
@@ -49,10 +50,17 @@ describe("tests generation of neurons positions", () => {
 
   test("TransitionNetwork", () => {
     const paint = new TransitionNetwork(null, true);
-    paint.arrangeInLayers(2, 3, 5, 5);
+    let params = {
+      distanceNeurons: 12,
+      distanceLayers: 20,
+    };
+
+    paint.generateNeuronLayers(params, 2, 3, 5, 5);
     expect(paint.neurons.length).toBe(15);
     paint.transitionTime = 0;
+    paint.positionUpdater = shiftNeurons;
     paint.startRendering(1); // 1 iteration
-    expect(paint.neurons[0].pos);
+    expect(paint.neurons[0].posX).toBe(paint.neurons[14].posX);
+    expect(paint.neurons[0].posY).toBe(10);
   });
 });

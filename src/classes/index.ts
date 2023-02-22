@@ -157,7 +157,6 @@ export class BasePainter {
   }
   drawInitialNeurons() {
     // draws the neurons
-
     d3.select(this.svgElement)
       .selectAll("circle")
       .data(this.neurons, (el: any): number => {
@@ -170,10 +169,10 @@ export class BasePainter {
         return el.radius;
       })
       .attr("cx", (el: neuron) => {
-        return el.posX;
+        return el.posX + this.center.x;
       })
       .attr("cy", (el: neuron) => {
-        return el.posY;
+        return el.posY + this.center.y;
       })
       .attr("fill", (el: neuron) => {
         return el.bgColor;
@@ -197,10 +196,10 @@ export class BasePainter {
       .transition()
       .duration(1000)
       .attr("cx", (el: neuron) => {
-        return el.posX;
+        return el.posX + this.center.x;
       })
       .attr("cy", (el: neuron) => {
-        return el.posY;
+        return el.posY + this.center.y;
       });
   }
 
