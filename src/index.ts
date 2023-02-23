@@ -5,4 +5,8 @@ export {
   PhysicsNetwork,
 } from "./classes/index";
 export { generateNeuron, assignRandomPositions } from "./Utils/generator";
-export { shiftNeurons, centerNeuronForce } from "./Utils/premade";
+export {
+  shiftNeurons,
+  centerNeuronForce,
+  additionalForces,
+} from "./Utils/premade";

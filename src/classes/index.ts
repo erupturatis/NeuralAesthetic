@@ -315,8 +315,8 @@ export class TransitionNetwork extends BasePainter {
 // the program will have a physics based implementation and an transition based implementation
 export class PhysicsNetwork extends BasePainter {
   FPS: number = 60;
-  forceLoss: number = 0.1; // the force loss per frame
-  forceMultiplier: number = 0.1; // the force multiplier
+  forceLoss: number = 0; // the force loss per frame
+  forceMultiplier: number = 0.01; // the force multiplier
 
   forces: coord[] = []; // the forces that will be applied to the neurons
 
@@ -325,6 +325,12 @@ export class PhysicsNetwork extends BasePainter {
     forces: coord[],
     iter: number
   ) => {}; // gets called to add forces to the neurons
+
+  addInitialForces: forceUpdater = (
+    neurons: neuron[],
+    forces: coord[],
+    iter: number
+  ) => {}; // gets called to add initial forces to the neurons
 
   constructor(htmlElement: SVGSVGElement) {
     super(htmlElement);
@@ -345,7 +351,7 @@ export class PhysicsNetwork extends BasePainter {
   }
   initializeForces() {
     for (let idx: number = 0; idx < this.neurons.length; idx++) {
-      this.forces[idx] = { x: 50, y: 50 };
+      this.forces[idx] = { x: 500, y: 100 };
     }
   }
 
@@ -361,12 +367,20 @@ export class PhysicsNetwork extends BasePainter {
     this.saveOriginalPositions();
     this.running = true;
     this.initializeForces();
+    // dispatch async forces
+    console.log("got here");
+    console.log(this.addInitialForces);
+    this.addInitialForces(this.neurons, this.forces, this.iter);
+
+    console.log("got here");
+    // dispatch async forces
+    //     this.addInitialForces(this.neurons, this.forces, this.iter);
     // starts the render loop
     while (true && (iterations === undefined || iterations-- > 0)) {
       // drawing the neurons with new positions
       this.instantTransition();
       // forces are added on Neurons
-      console.log(this.neurons, this.forces);
+      //console.log(this.neurons, this.forces);
       this.addForces(this.neurons, this.forces, this.iter);
       // forces are applied, calculates dx and dy
       this.applyForces();

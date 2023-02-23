@@ -4,7 +4,9 @@ import {
   TransitionNetwork,
   PhysicsNetwork,
   centerNeuronForce,
+  additionalForces,
 } from "../../";
+import { delay } from "../../../src/Utils/general";
 
 function App() {
   useEffect(() => {
@@ -28,6 +30,8 @@ function App() {
       1
     );
     paint.addForces = centerNeuronForce;
+
+    paint.addInitialForces = additionalForces;
     paint.startRendering();
   }, []);
 
