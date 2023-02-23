@@ -1,5 +1,7 @@
 export interface neuron {
   index: number;
+  originalPosX: number;
+  originalPosY: number;
   posX: number;
   posY: number;
   newPosX: number;
@@ -21,4 +23,9 @@ export interface coord {
   y: number;
 }
 
-export type posUpdater = (neurons: neuron[]) => void;
+export type posUpdater = (neurons: neuron[], iter: number) => void; // updating newPosX and newPosY
+export type forceUpdater = (
+  neurons: neuron[],
+  forces: coord[],
+  iter: number
+) => void; // updating forces array

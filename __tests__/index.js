@@ -5,4 +5,6 @@ export {
   PhysicsNetwork,
   TransitionNetwork,
   shiftNeurons,
+  centerNeuronForce,
+  additionalForces,
 } from "../src";

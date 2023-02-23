@@ -1,5 +1,12 @@
 import { useEffect } from "react";
-import { shiftNeurons, TransitionNetwork } from "../../";
+import {
+  shiftNeurons,
+  TransitionNetwork,
+  PhysicsNetwork,
+  centerNeuronForce,
+  additionalForces,
+} from "../../";
+import { delay } from "../../../src/Utils/general";
 
 function App() {
   useEffect(() => {
@@ -11,8 +18,21 @@ function App() {
       5,
       6
     );
+    paint.transitionInterval = 1000;
+    paint.transitionTime = 1000;
     paint.positionUpdater = shiftNeurons;
-    paint.startRendering(10);
+    //paint.startRendering();
+  }, []);
+  useEffect(() => {
+    let paint = new PhysicsNetwork(document.querySelector("#root-svg"));
+    paint.generateNeuronLayers(
+      { distanceLayers: 50, distanceNeurons: 50, layers: 3 },
+      1
+    );
+    paint.addForces = centerNeuronForce;
+
+    paint.addInitialForces = additionalForces;
+    paint.startRendering();
   }, []);
 
   // integration testing will be done manually here, will set up some tests

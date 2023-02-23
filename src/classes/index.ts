@@ -4,6 +4,7 @@ import {
   neuron,
   coord,
   posUpdater,
+  forceUpdater,
 } from "../interfaces/interface";
 import * as d3 from "d3";
 
@@ -22,6 +23,11 @@ class Params {
   refresh = false;
 
   checkSvg = true;
+
+  distanceLayers: number = 100;
+  distanceNeurons: number = 50;
+
+  iter: number = 0;
 }
 export class BasePainter extends Params {
   running: boolean;
@@ -121,6 +127,8 @@ export class BasePainter extends Params {
   }
 
   arrangeInLayers(params: layerParams, ...args: number[]) {
+    this.distanceLayers = params.distanceLayers;
+    this.distanceNeurons = params.distanceNeurons;
     // arranges existent neurons in layers
     // the network will be centered around in the middle of the svg or group
 
@@ -194,6 +202,7 @@ export class BasePainter extends Params {
         return el.strokeWidth;
       });
   }
+
   applyPositions() {
     // applies newPos to pos for all neurons
     for (let neuron of this.neurons) {
@@ -201,6 +210,7 @@ export class BasePainter extends Params {
       neuron.posY = neuron.newPosY;
     }
   }
+
   instantTransition() {
     // same as transitionNeurons but without the transition
     d3.select(this.svgElement)
@@ -217,6 +227,7 @@ export class BasePainter extends Params {
         return el.posY + this.center.y;
       });
   }
+
   async checkSvgSize() {
     // if svg size changes, we need to recalculate the center with the calculateSVGSizes function
     while (true && this.checkSvg) {
@@ -232,25 +243,18 @@ export class BasePainter extends Params {
       }
     }
   }
-
-  terminateWorkers() {
-    // terminates the workers
-    for (let worker of this.workers) {
-      worker.terminate();
+  saveOriginalPositions() {
+    // saves the original positions of the neurons
+    for (let neuron of this.neurons) {
+      neuron.originalPosX = neuron.posX;
+      neuron.originalPosY = neuron.posY;
     }
   }
 }
-// the program will have a physics based implementation and an transition based implementation
-export class PhysicsNetwork extends BasePainter {
-  constructor(htmlElement: SVGSVGElement) {
-    super(htmlElement);
-  }
-}
-
 export class TransitionNetwork extends BasePainter {
   transitionTime: number = 500;
   transitionInterval: number = 2000; // the time between the transitions
-  positionUpdater: posUpdater = (neurons: neuron[]) => {}; // gets called to set next transition positions
+  positionUpdater: posUpdater = (neurons: neuron[], iter: number) => {}; // gets called to set next transition positions
 
   constructor(htmlElement: SVGSVGElement) {
     super(htmlElement);
@@ -274,7 +278,6 @@ export class TransitionNetwork extends BasePainter {
         return el.posY + this.center.y;
       });
   }
-
   async startRendering(iterations?: number) {
     // draws the initial neurons applying the properties
     this.calculateSVGSizes();
@@ -282,17 +285,109 @@ export class TransitionNetwork extends BasePainter {
     this.checkSvgSize();
 
     this.drawInitialNeurons();
+    // saving the original positions
+    this.saveOriginalPositions();
     this.running = true;
     // starts the render loop
-    while (iterations === undefined || iterations-- > 0) {
+    while (true && (iterations === undefined || iterations-- > 0)) {
       //the new positions will be calculated
-      this.positionUpdater(this.neurons);
+      this.positionUpdater(this.neurons, this.iter);
+
       // applies the new positions
       this.applyPositions();
       // sleep for transitionInterval
       await delay(this.transitionInterval);
       // in the transition network the neurons will be moved to their new positions
       this.transitionNeurons();
+    }
+    this.running = false;
+    // write code for drawing the neurons
+  }
+  saveOriginalPositions() {
+    // saves the original positions of the neurons
+    for (let neuron of this.neurons) {
+      neuron.originalPosX = neuron.posX;
+      neuron.originalPosY = neuron.posY;
+    }
+  }
+}
+
+// the program will have a physics based implementation and an transition based implementation
+export class PhysicsNetwork extends BasePainter {
+  FPS: number = 60;
+  forceLoss: number = 0; // the force loss per frame
+  forceMultiplier: number = 0.01; // the force multiplier
+
+  forces: coord[] = []; // the forces that will be applied to the neurons
+
+  addForces: forceUpdater = (
+    neurons: neuron[],
+    forces: coord[],
+    iter: number
+  ) => {}; // gets called to add forces to the neurons
+
+  addInitialForces: forceUpdater = (
+    neurons: neuron[],
+    forces: coord[],
+    iter: number
+  ) => {}; // gets called to add initial forces to the neurons
+
+  constructor(htmlElement: SVGSVGElement) {
+    super(htmlElement);
+  }
+
+  // movement will have no transition, positions will be calculated in the render loop
+  applyForces() {
+    for (let idx = 0; idx < this.neurons.length; idx++) {
+      const neuron = this.neurons[idx];
+      const force = this.forces[idx];
+      // the force will be applied to the neuron
+      neuron.newPosX = neuron.posX + force.x * this.forceMultiplier;
+      neuron.newPosY = neuron.posY + force.y * this.forceMultiplier;
+      // the force will be reduced
+      force.x *= 1 - this.forceLoss;
+      force.y *= 1 - this.forceLoss;
+    }
+  }
+  initializeForces() {
+    for (let idx: number = 0; idx < this.neurons.length; idx++) {
+      this.forces[idx] = { x: 500, y: 100 };
+    }
+  }
+
+  // render loop
+  async startRendering(iterations?: number) {
+    // draws the initial neurons applying the properties
+    this.calculateSVGSizes();
+    this.checkSvgSize();
+    this.drawInitialNeurons();
+    //intialization of the positionsDx and positionsDy arrays with 0 for each neuron
+
+    // saving the original positions
+    this.saveOriginalPositions();
+    this.running = true;
+    this.initializeForces();
+    // dispatch async forces
+    console.log("got here");
+    console.log(this.addInitialForces);
+    this.addInitialForces(this.neurons, this.forces, this.iter);
+
+    console.log("got here");
+    // dispatch async forces
+    //     this.addInitialForces(this.neurons, this.forces, this.iter);
+    // starts the render loop
+    while (true && (iterations === undefined || iterations-- > 0)) {
+      // drawing the neurons with new positions
+      this.instantTransition();
+      // forces are added on Neurons
+      //console.log(this.neurons, this.forces);
+      this.addForces(this.neurons, this.forces, this.iter);
+      // forces are applied, calculates dx and dy
+      this.applyForces();
+      // the new positions are calculated from the old positions and the dx and dy
+      this.applyPositions();
+      await delay(1000 / this.FPS);
+      this.instantTransition();
     }
     this.running = false;
     // write code for drawing the neurons
