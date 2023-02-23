@@ -3,6 +3,8 @@ import { neuron } from "../interfaces/interface";
 export const generateNeuron = (): neuron => {
   let neuron: neuron = {
     index: -1,
+    originalX: 0,
+    originalY: 0,
     posX: 0,
     posY: 0,
     newPosX: 0,
