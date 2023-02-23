@@ -3,8 +3,11 @@ import {
   layerParams,
   neuron,
   coord,
-  posUpdater,
+  propUpdater,
   forceUpdater,
+  renderingParams,
+  circleParams,
+  initialPositions,
 } from "../interfaces/interface";
 import * as d3 from "d3";
 
@@ -118,15 +121,20 @@ export class BasePainter extends Params {
     this.neurons[index].flags[key] = flag;
   }
 
-  generateNeuronLayers(params: layerParams, ...args: number[]) {
-    let nrNeurons: number = args.reduce(
+  generateNeuronLayers(params: layerParams) {
+    let nrNeurons: number = params.layers.reduce(
       (prevVal, currVal) => prevVal + currVal
     );
     this.generateNeurons(nrNeurons);
-    this.arrangeInLayers(params, ...args);
+    this.arrangeInLayers(params);
   }
 
-  arrangeInLayers(params: layerParams, ...args: number[]) {
+  customArrangement(numNeurons: number, customArrangement: initialPositions) {
+    this.generateNeurons(numNeurons);
+    customArrangement(this.neurons);
+  }
+
+  arrangeInLayers(params: layerParams) {
     this.distanceLayers = params.distanceLayers;
     this.distanceNeurons = params.distanceNeurons;
     // arranges existent neurons in layers
@@ -135,13 +143,14 @@ export class BasePainter extends Params {
     // calculating X positions based on layerDistance
     let unit: number = params.distanceLayers;
     let neuronUnit: number = params.distanceNeurons;
-    let middle: number = (args.length - 1) / 2;
+    let layerNumber: number = params.layers.length;
+    let middle: number = (layerNumber - 1) / 2;
     let neuronIdx = 0;
-    for (let idx: number = 0; idx < args.length; idx += 1) {
+    for (let idx: number = 0; idx < layerNumber; idx += 1) {
       // keeping index of neurons because they should be in order
       let layerNr = 0;
-      for (; layerNr < args[idx]; layerNr += 1) {
-        let layerMiddle = (args[idx] - 1) / 2;
+      for (; layerNr < params.layers[idx]; layerNr += 1) {
+        let layerMiddle = (params.layers[idx] - 1) / 2;
 
         this.neurons[neuronIdx + layerNr].flags["layer"] = idx;
         this.neurons[neuronIdx + layerNr].flags["layerIdx"] = layerNr;
@@ -150,6 +159,22 @@ export class BasePainter extends Params {
         this.neurons[neuronIdx + layerNr].posY = unit * (layerNr - layerMiddle);
       }
       neuronIdx += layerNr;
+    }
+  }
+
+  arrangeInCircle(params: circleParams) {
+    // arranges neurons in a circle
+    this.generateNeurons(params.neurons);
+    const numNeurons = params.neurons; // The number of neurons you want to place on the circle
+    const radius = params.radius; // The radius of the circle
+
+    for (let i = 0; i < numNeurons; i++) {
+      const angle = (2 * Math.PI * i) / numNeurons; // Calculate the angle for this neuron
+      const x = radius * Math.cos(angle); // Calculate the x position
+      const y = radius * Math.sin(angle); // Calculate the y position
+
+      this.neurons[i].posX = x;
+      this.neurons[i].posY = y;
     }
   }
 
@@ -183,14 +208,15 @@ export class BasePainter extends Params {
       })
       .enter()
       .append("circle")
-      .attr("r", (el: neuron) => {
-        return el.radius;
-      })
+
       .attr("cx", (el: neuron) => {
         return el.posX + this.center.x;
       })
       .attr("cy", (el: neuron) => {
         return el.posY + this.center.y;
+      })
+      .attr("r", (el: neuron) => {
+        return el.radius;
       })
       .attr("fill", (el: neuron) => {
         return el.bgColor;
@@ -254,7 +280,7 @@ export class BasePainter extends Params {
 export class TransitionNetwork extends BasePainter {
   transitionTime: number = 500;
   transitionInterval: number = 2000; // the time between the transitions
-  positionUpdater: posUpdater = (neurons: neuron[], iter: number) => {}; // gets called to set next transition positions
+  propertiesUpdater: propUpdater = (neurons: neuron[], iter: number) => {}; // gets called to set next transition positions
 
   constructor(htmlElement: SVGSVGElement) {
     super(htmlElement);
@@ -276,22 +302,59 @@ export class TransitionNetwork extends BasePainter {
       })
       .attr("cy", (el: neuron) => {
         return el.posY + this.center.y;
+      })
+      .attr("r", (el: neuron) => {
+        return el.radius;
+      })
+      .attr("fill", (el: neuron) => {
+        return el.bgColor;
+      })
+      .attr("stroke", (el: neuron) => {
+        return el.strokeColor;
+      })
+      .attr("stroke-width", (el: neuron) => {
+        return el.strokeWidth;
       });
   }
-  async startRendering(iterations?: number) {
+  paramsChecker(params: renderingParams) {
+    if (params.infinite == false && params.iterations == undefined) {
+      throw "You need to specify the number of iterations or set infinite to true";
+    }
+    if (params.transitionTime != undefined) {
+      this.transitionTime = params.transitionTime;
+    } else {
+      throw "You need to specify the transition time in ms";
+    }
+    if (params.transitionInterval != undefined) {
+      this.transitionInterval = params.transitionInterval;
+    } else {
+      throw "You need to specify the transition interval in ms";
+    }
+    if (params.propertiesUpdater != undefined) {
+      this.propertiesUpdater = params.propertiesUpdater;
+    } else {
+      throw "You need to specify the properties updater function";
+    }
+  } // checks if the params are valid
+
+  async startRendering(params: renderingParams) {
     // draws the initial neurons applying the properties
+    this.paramsChecker(params);
     this.calculateSVGSizes();
-
     this.checkSvgSize();
-
     this.drawInitialNeurons();
     // saving the original positions
     this.saveOriginalPositions();
     this.running = true;
     // starts the render loop
-    while (true && (iterations === undefined || iterations-- > 0)) {
+
+    this.iter = 0;
+    while (
+      params.infinite ||
+      (params.iterations !== undefined && this.iter < params.iterations)
+    ) {
       //the new positions will be calculated
-      this.positionUpdater(this.neurons, this.iter);
+      this.propertiesUpdater(this.neurons, this.iter);
 
       // applies the new positions
       this.applyPositions();
@@ -299,6 +362,7 @@ export class TransitionNetwork extends BasePainter {
       await delay(this.transitionInterval);
       // in the transition network the neurons will be moved to their new positions
       this.transitionNeurons();
+      this.iter += 1;
     }
     this.running = false;
     // write code for drawing the neurons
@@ -316,7 +380,7 @@ export class TransitionNetwork extends BasePainter {
 export class PhysicsNetwork extends BasePainter {
   FPS: number = 60;
   forceLoss: number = 0; // the force loss per frame
-  forceMultiplier: number = 0.01; // the force multiplier
+  forceMultiplier: number = 0.005; // the force multiplier
 
   forces: coord[] = []; // the forces that will be applied to the neurons
 
@@ -351,7 +415,7 @@ export class PhysicsNetwork extends BasePainter {
   }
   initializeForces() {
     for (let idx: number = 0; idx < this.neurons.length; idx++) {
-      this.forces[idx] = { x: 500, y: 100 };
+      this.forces[idx] = { x: 1000, y: 200 };
     }
   }
 
@@ -367,20 +431,13 @@ export class PhysicsNetwork extends BasePainter {
     this.saveOriginalPositions();
     this.running = true;
     this.initializeForces();
-    // dispatch async forces
-    console.log("got here");
-    console.log(this.addInitialForces);
+    // dispatch initial forces (may also pe async for loops)
     this.addInitialForces(this.neurons, this.forces, this.iter);
-
-    console.log("got here");
-    // dispatch async forces
-    //     this.addInitialForces(this.neurons, this.forces, this.iter);
     // starts the render loop
     while (true && (iterations === undefined || iterations-- > 0)) {
       // drawing the neurons with new positions
       this.instantTransition();
       // forces are added on Neurons
-      //console.log(this.neurons, this.forces);
       this.addForces(this.neurons, this.forces, this.iter);
       // forces are applied, calculates dx and dy
       this.applyForces();
