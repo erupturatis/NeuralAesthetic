@@ -1,3 +1,4 @@
+const document = require("../Utils/document");
 import { delay } from "../Utils/general";
 import {
   layerParams,
@@ -19,6 +20,7 @@ interface posObject {
   posX: number;
   posY: number;
 }
+
 class Params {
   svgWidth: number = 0;
   svgHeight: number = 0;
@@ -33,7 +35,9 @@ class Params {
 
   iter: number = 0;
   hidden = false;
+  document: any = undefined;
 }
+
 export class BasePainter extends Params {
   running: boolean;
   neurons: neuron[]; // keeping the index equal to the arr index,
@@ -52,7 +56,8 @@ export class BasePainter extends Params {
 
   constructor(htmlElement: SVGSVGElement) {
     super();
-    if (typeof document.hidden !== "undefined") {
+    this.document = document;
+    if (this.document && typeof this.document.hidden !== "undefined") {
       // Add a visibility change event listener
       document.addEventListener("visibilitychange", () => {
         this.hidden = document.hidden;
@@ -517,7 +522,6 @@ export class TransitionNetwork extends BasePainter {
         continue;
       }
 
-      console.log(this.iter, this.hidden);
       this.propertiesUpdater(this.neurons, this.iter);
 
       // applies the new positions
