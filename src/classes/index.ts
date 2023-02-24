@@ -8,6 +8,7 @@ import {
   renderingParams,
   circleParams,
   initialPositions,
+  connection,
 } from "../interfaces/interface";
 import * as d3 from "d3";
 
@@ -31,11 +32,13 @@ class Params {
   distanceNeurons: number = 50;
 
   iter: number = 0;
+  hidden = false;
 }
 export class BasePainter extends Params {
   running: boolean;
   neurons: neuron[]; // keeping the index equal to the arr index,
   // since the neuron number will not change much if at all
+  connections: connection[] = [];
   svgElement: SVGSVGElement;
   minX: number = 0;
   maxX: number = 0;
@@ -49,6 +52,12 @@ export class BasePainter extends Params {
 
   constructor(htmlElement: SVGSVGElement) {
     super();
+    if (typeof document.hidden !== "undefined") {
+      // Add a visibility change event listener
+      document.addEventListener("visibilitychange", () => {
+        this.hidden = document.hidden;
+      });
+    }
     this.neurons = [];
     this.running = false;
     this.svgElement = htmlElement;
@@ -62,21 +71,39 @@ export class BasePainter extends Params {
     }
   }
 
-  set strokeWidth(value: number) {
+  set neuronStrokeWidth(value: number) {
     for (let idx = 0; idx < this.neurons.length; idx += 1) {
       this.neurons[idx].strokeWidth = value;
     }
   }
 
-  set strokeColor(value: string) {
+  set neuronStrokeColor(value: string) {
     for (let idx = 0; idx < this.neurons.length; idx += 1) {
       this.neurons[idx].strokeColor = value;
     }
   }
 
-  set bgColor(value: string) {
+  set neuronBgColor(value: string) {
     for (let idx = 0; idx < this.neurons.length; idx += 1) {
       this.neurons[idx].bgColor = value;
+    }
+  }
+
+  set connectionStrokeWidth(value: number) {
+    for (let idx = 0; idx < this.connections.length; idx += 1) {
+      this.connections[idx].strokeWidth = value;
+    }
+  }
+
+  set connectionStrokeColor(value: string) {
+    for (let idx = 0; idx < this.connections.length; idx += 1) {
+      this.connections[idx].strokeColor = value;
+    }
+  }
+
+  set connectionStrokeOpacity(value: number) {
+    for (let idx = 0; idx < this.connections.length; idx += 1) {
+      this.connections[idx].strokeOpacity = value;
     }
   }
 
@@ -103,8 +130,26 @@ export class BasePainter extends Params {
     }
   }
 
-  addNeurons(numberNeurons: number) {
+  addNeuron(neuron: neuron) {
     // adds more neurons to the existing ones
+    this.neurons.push(neuron);
+  }
+
+  addConnections(connections: connection[]) {
+    // validating and adding missing props
+    for (let idx: number = 0; idx < connections.length; idx++) {
+      if (connections[idx].strokeWidth === undefined) {
+        connections[idx].strokeWidth = 1;
+      }
+      if (connections[idx].strokeColor === undefined) {
+        connections[idx].strokeColor = "black";
+      }
+      if (connections[idx].strokeOpacity === undefined) {
+        connections[idx].strokeOpacity = 1;
+      }
+      connections[idx].index = idx + this.connections.length;
+    }
+    this.connections.push(...connections);
   }
 
   assignRandomPosition() {
@@ -129,7 +174,7 @@ export class BasePainter extends Params {
     this.arrangeInLayers(params);
   }
 
-  customArrangement(numNeurons: number, customArrangement: initialPositions) {
+  arrangeCustom(numNeurons: number, customArrangement: initialPositions) {
     this.generateNeurons(numNeurons);
     customArrangement(this.neurons);
   }
@@ -198,6 +243,47 @@ export class BasePainter extends Params {
     this.center.x = (this.maxX + this.minX) / 2;
     this.center.y = (this.maxY + this.minY) / 2;
   }
+
+  drawInitialConnections() {
+    // draws the connections between the neurons
+
+    // appending a g element for connections to the root svg
+    d3.select(this.svgElement).append("g").attr("id", "connections");
+
+    // appending the lines to the g element
+
+    d3.select(this.svgElement)
+      .selectChildren("#connections")
+      .selectAll("line")
+      .data(this.connections, (el: any): number => {
+        return el.index;
+        // return the index of the connection
+      })
+      .enter()
+      .append("line")
+      .attr("x1", (el: connection) => {
+        return this.neurons[el.idxNeuron1].posX + this.center.x;
+      })
+      .attr("y1", (el: connection) => {
+        return this.neurons[el.idxNeuron1].posY + this.center.y;
+      })
+      .attr("x2", (el: connection) => {
+        return this.neurons[el.idxNeuron2].posX + this.center.x;
+      })
+      .attr("y2", (el: connection) => {
+        return this.neurons[el.idxNeuron2].posY + this.center.y;
+      })
+      .attr("stroke", (el: connection) => {
+        return el.strokeColor;
+      })
+      .attr("stroke-width", (el: connection) => {
+        return el.strokeWidth;
+      })
+      .attr("stroke-opacity", (el: connection) => {
+        return el.strokeOpacity;
+      });
+  }
+
   drawInitialNeurons() {
     // draws the neurons
     d3.select(this.svgElement)
@@ -227,6 +313,8 @@ export class BasePainter extends Params {
       .attr("stroke-width", (el: neuron) => {
         return el.strokeWidth;
       });
+
+    // draws the connections
   }
 
   applyPositions() {
@@ -252,6 +340,34 @@ export class BasePainter extends Params {
       .attr("cy", (el: neuron) => {
         return el.posY + this.center.y;
       });
+
+    d3.select(this.svgElement)
+      .selectAll("line")
+      .data(this.connections, (el: any): number => {
+        return el.index;
+        // return the index of the connection
+      })
+      .attr("x1", (el: connection) => {
+        return this.neurons[el.idxNeuron1].posX + this.center.x;
+      })
+      .attr("y1", (el: connection) => {
+        return this.neurons[el.idxNeuron1].posY + this.center.y;
+      })
+      .attr("x2", (el: connection) => {
+        return this.neurons[el.idxNeuron2].posX + this.center.x;
+      })
+      .attr("y2", (el: connection) => {
+        return this.neurons[el.idxNeuron2].posY + this.center.y;
+      })
+      .attr("stroke", (el: connection) => {
+        return el.strokeColor;
+      })
+      .attr("stroke-width", (el: connection) => {
+        return el.strokeWidth;
+      })
+      .attr("stroke-opacity", (el: connection) => {
+        return el.strokeOpacity;
+      });
   }
 
   async checkSvgSize() {
@@ -276,7 +392,14 @@ export class BasePainter extends Params {
       neuron.originalPosY = neuron.posY;
     }
   }
+
+  drawStaticNetwork() {
+    // draws the network without any transitions
+    this.drawInitialConnections();
+    this.drawInitialNeurons();
+  }
 }
+
 export class TransitionNetwork extends BasePainter {
   transitionTime: number = 500;
   transitionInterval: number = 2000; // the time between the transitions
@@ -316,6 +439,40 @@ export class TransitionNetwork extends BasePainter {
         return el.strokeWidth;
       });
   }
+
+  transitionConnections() {
+    // transitions the connections to their new positions
+    d3.select(this.svgElement)
+      .selectAll("line")
+      .data(this.connections, (el: any): number => {
+        return el.index;
+        // return the index of the connection
+      })
+      .transition()
+      .duration(this.transitionTime)
+      .attr("x1", (el: connection) => {
+        return this.neurons[el.idxNeuron1].posX + this.center.x;
+      })
+      .attr("y1", (el: connection) => {
+        return this.neurons[el.idxNeuron1].posY + this.center.y;
+      })
+      .attr("x2", (el: connection) => {
+        return this.neurons[el.idxNeuron2].posX + this.center.x;
+      })
+      .attr("y2", (el: connection) => {
+        return this.neurons[el.idxNeuron2].posY + this.center.y;
+      })
+      .attr("stroke", (el: connection) => {
+        return el.strokeColor;
+      })
+      .attr("stroke-width", (el: connection) => {
+        return el.strokeWidth;
+      })
+      .attr("stroke-opacity", (el: connection) => {
+        return el.strokeOpacity;
+      });
+  }
+
   paramsChecker(params: renderingParams) {
     if (params.infinite == false && params.iterations == undefined) {
       throw "You need to specify the number of iterations or set infinite to true";
@@ -342,6 +499,7 @@ export class TransitionNetwork extends BasePainter {
     this.paramsChecker(params);
     this.calculateSVGSizes();
     this.checkSvgSize();
+    this.drawInitialConnections();
     this.drawInitialNeurons();
     // saving the original positions
     this.saveOriginalPositions();
@@ -354,6 +512,12 @@ export class TransitionNetwork extends BasePainter {
       (params.iterations !== undefined && this.iter < params.iterations)
     ) {
       //the new positions will be calculated
+      if (this.hidden) {
+        await delay(200);
+        continue;
+      }
+
+      console.log(this.iter, this.hidden);
       this.propertiesUpdater(this.neurons, this.iter);
 
       // applies the new positions
@@ -362,6 +526,7 @@ export class TransitionNetwork extends BasePainter {
       await delay(this.transitionInterval);
       // in the transition network the neurons will be moved to their new positions
       this.transitionNeurons();
+      this.transitionConnections();
       this.iter += 1;
     }
     this.running = false;
@@ -425,6 +590,7 @@ export class PhysicsNetwork extends BasePainter {
     this.calculateSVGSizes();
     this.checkSvgSize();
     this.drawInitialNeurons();
+    this.drawInitialConnections();
     //intialization of the positionsDx and positionsDy arrays with 0 for each neuron
 
     // saving the original positions
@@ -435,6 +601,10 @@ export class PhysicsNetwork extends BasePainter {
     this.addInitialForces(this.neurons, this.forces, this.iter);
     // starts the render loop
     while (true && (iterations === undefined || iterations-- > 0)) {
+      if (this.hidden) {
+        await delay(200);
+        continue;
+      }
       // drawing the neurons with new positions
       this.instantTransition();
       // forces are added on Neurons

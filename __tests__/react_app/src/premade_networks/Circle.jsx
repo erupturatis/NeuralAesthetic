@@ -17,12 +17,25 @@ const Circle = () => {
       neurons: 30,
       radius: 200,
     });
-    // paint.generateNeuronLayers({
-    //   distanceLayers: 50,
-    //   distanceNeurons: 50,
-    //   layers: [2, 3, 5, 6],
-    // });
-    // adding arguments to neurons here
+    paint.addConnections([
+      {
+        idxNeuron1: 0,
+        idxNeuron2: 1,
+      },
+      {
+        idxNeuron1: 1,
+        idxNeuron2: 2,
+      },
+
+      {
+        idxNeuron1: 2,
+        idxNeuron2: 3,
+      },
+      {
+        idxNeuron1: 1,
+        idxNeuron2: 18,
+      },
+    ]);
     paint.startRendering({
       infinite: true,
       transitionTime: 1000,

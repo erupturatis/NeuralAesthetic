@@ -13,6 +13,15 @@ export interface neuron {
   flags: { [key: string]: any }; // needed to easily identify a specific subset of neurons for effects
 }
 
+export interface connection {
+  index: number;
+  idxNeuron1: number;
+  idxNeuron2: number;
+  strokeColor: string;
+  strokeWidth: number;
+  strokeOpacity: number;
+}
+
 export interface layerParams {
   distanceNeurons: number;
   distanceLayers: number;
