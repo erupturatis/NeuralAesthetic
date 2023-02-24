@@ -46,9 +46,10 @@ describe("tests generation of neurons positions", () => {
     let params = {
       distanceNeurons: 12,
       distanceLayers: 20,
+      layers: [2, 3, 5, 5],
     };
 
-    paint.generateNeuronLayers(params, 2, 3, 5, 5);
+    paint.generateNeuronLayers(params);
 
     expect(paint.neurons.length).toBe(15);
     expect(paint.neurons[2].flags["layer"]).toBe(1); // layers indexed from 0
@@ -67,11 +68,11 @@ describe("tests generation of neurons positions", () => {
     paint.generateNeurons(12);
     paint.neuronRadius = 23;
     expect(paint.neurons[3].radius).toBe(23);
-    paint.strokeWidth = 3;
+    paint.neuronStrokeWidth = 3;
     expect(paint.neurons[2].strokeWidth).toBe(3);
-    paint.strokeColor = "red";
+    paint.neuronStrokeColor = "red";
     expect(paint.neurons[5].strokeColor).toBe("red");
-    paint.bgColor = "green";
+    paint.neuronBgColor = "green";
     expect(paint.neurons[1].bgColor).toBe("green");
   });
 
@@ -80,14 +81,20 @@ describe("tests generation of neurons positions", () => {
     let params = {
       distanceNeurons: 12,
       distanceLayers: 20,
+      layers: [2, 3, 5, 5],
     };
 
-    paint.generateNeuronLayers(params, 2, 3, 5, 5);
+    paint.generateNeuronLayers(params);
     expect(paint.neurons.length).toBe(15);
     paint.transitionInterval = 0;
     paint.transitionTime = 0;
-    paint.positionUpdater = shiftNeurons;
-    await paint.startRendering(1); // 1 iteration
+    await paint.startRendering({
+      infinite: false,
+      iterations: 1,
+      transitionTime: 0,
+      transitionInterval: 0,
+      propertiesUpdater: shiftNeurons,
+    }); // 1 iteration
     paint.checkSvg = false;
     expect(paint.neurons[0].posX).toBe(paint.neurons[14].posX);
     expect(paint.neurons[0].posY).toBe(10);

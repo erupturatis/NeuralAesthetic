@@ -1,5 +1,5 @@
 import {
-  posUpdater,
+  propUpdater,
   neuron,
   forceUpdater,
   coord,
@@ -7,7 +7,7 @@ import {
 // contains all the premade functions
 import { delay } from "./general";
 
-export const shiftNeurons: posUpdater = (neurons: neuron[], iter: number) => {
+export const shiftNeurons: propUpdater = (neurons: neuron[], iter: number) => {
   let lng: number = neurons.length;
   neurons[lng - 1].newPosX = neurons[0].posX;
   neurons[lng - 1].newPosY = neurons[0].posY;
@@ -32,5 +32,5 @@ export const centerNeuronForce: forceUpdater = (
 
 export const additionalForces: forceUpdater = async (neurons, forces, iter) => {
   await delay(1000);
-  forces[0].y += 500;
+  forces[0].y += 1000;
 };
