@@ -1,21 +1,33 @@
-import { neuron } from "../interfaces/interface";
+import { neuron, connection } from "../interfaces/interface";
 
 export const generateNeuron = (): neuron => {
   let neuron: neuron = {
     index: -1,
-    originalX: 0,
-    originalY: 0,
+    originalPosX: 0,
+    originalPosY: 0,
     posX: 0,
     posY: 0,
     newPosX: 0,
     newPosY: 0,
-    radius: 10,
-    strokeWidth: 1,
-    strokeColor: "black",
-    bgColor: "white",
+    radius: 20,
+    strokeWidth: 1.5,
+    strokeColor: "white",
+    bgColor: "black",
     flags: {},
   };
   return neuron;
+};
+
+export const generateConnProps = (): connection => {
+  let connection: connection = {
+    index: -1,
+    idxNeuron1: -1,
+    idxNeuron2: -1,
+    strokeColor: "white",
+    strokeWidth: 2,
+    strokeOpacity: 1,
+  };
+  return connection;
 };
 
 export const assignRandomPositions = (

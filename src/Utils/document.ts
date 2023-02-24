@@ -1,1 +1,1 @@
-module.exports = typeof document === "undefined" ? {} : document;
+export default typeof document === "undefined" ? "undefined" : document;

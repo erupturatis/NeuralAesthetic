@@ -14,34 +14,18 @@ const Circle = () => {
       document.querySelector("#root-svg-circle")
     );
     paint.arrangeInCircle({
-      neurons: 30,
+      neurons: 20,
       radius: 200,
     });
-    paint.addConnections([
-      {
-        idxNeuron1: 0,
-        idxNeuron2: 1,
-      },
-      {
-        idxNeuron1: 1,
-        idxNeuron2: 2,
-      },
 
-      {
-        idxNeuron1: 2,
-        idxNeuron2: 3,
-      },
-      {
-        idxNeuron1: 1,
-        idxNeuron2: 18,
-      },
-    ]);
+    paint.addFullConnections();
+
     paint.startRendering({
       infinite: true,
       transitionTime: 1000,
       transitionInterval: 1000,
       propertiesUpdater: shiftNeurons,
-    }); // paint.drawInitialNeurons();
+    });
   }, []);
 
   return (

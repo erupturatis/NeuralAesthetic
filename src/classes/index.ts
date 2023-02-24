@@ -1,4 +1,5 @@
-const document = require("../Utils/document");
+import document from "../Utils/document";
+
 import { delay } from "../Utils/general";
 import {
   layerParams,
@@ -13,7 +14,11 @@ import {
 } from "../interfaces/interface";
 import * as d3 from "d3";
 
-import { assignRandomPositions, generateNeuron } from "../Utils/generator";
+import {
+  assignRandomPositions,
+  generateNeuron,
+  generateConnProps,
+} from "../Utils/generator";
 
 interface posObject {
   index: number;
@@ -57,10 +62,13 @@ export class BasePainter extends Params {
   constructor(htmlElement: SVGSVGElement) {
     super();
     this.document = document;
-    if (this.document && typeof this.document.hidden !== "undefined") {
+    if (
+      this.document !== "undefined" &&
+      typeof this.document.hidden !== "undefined"
+    ) {
       // Add a visibility change event listener
-      document.addEventListener("visibilitychange", () => {
-        this.hidden = document.hidden;
+      this.document.addEventListener("visibilitychange", () => {
+        this.hidden = this.document.hidden;
       });
     }
     this.neurons = [];
@@ -140,17 +148,34 @@ export class BasePainter extends Params {
     this.neurons.push(neuron);
   }
 
+  addFullConnections() {
+    // adds connections between all neurons
+    let connections: connection[] = [];
+    for (let idx: number = 0; idx < this.neurons.length; idx++) {
+      for (let idx2: number = idx + 1; idx2 < this.neurons.length; idx2++) {
+        let connection: any = {
+          index: connections.length,
+          idxNeuron1: idx,
+          idxNeuron2: idx2,
+        };
+        connections.push(connection);
+      }
+    }
+    this.addConnections(connections);
+  }
+
   addConnections(connections: connection[]) {
     // validating and adding missing props
+    let basicConn = generateConnProps();
     for (let idx: number = 0; idx < connections.length; idx++) {
       if (connections[idx].strokeWidth === undefined) {
-        connections[idx].strokeWidth = 1;
+        connections[idx].strokeWidth = basicConn.strokeWidth;
       }
       if (connections[idx].strokeColor === undefined) {
-        connections[idx].strokeColor = "black";
+        connections[idx].strokeColor = basicConn.strokeColor;
       }
       if (connections[idx].strokeOpacity === undefined) {
-        connections[idx].strokeOpacity = 1;
+        connections[idx].strokeOpacity = basicConn.strokeOpacity;
       }
       connections[idx].index = idx + this.connections.length;
     }

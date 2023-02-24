@@ -14,7 +14,15 @@
     "awesome",
     "javascript",
     "neural-networks",
-    "javascript-graphics"
+    "javascript-graphics",
+    "javascript-visualization",
+    "javascript-visualization-library",
+    "javascript-graphics-library",
+    "neural-networks-library",
+    "neural-networks-visualization",
+    "neural-networks-visualization-library",
+    "neural-networks-graphics",
+    "neural-networks-graphics-library"
   ],
   "author": "erupturatis",
   "license": "MIT",
