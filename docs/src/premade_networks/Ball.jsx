@@ -16,16 +16,13 @@ const Ball = () => {
     });
     paint.addFullConnections();
 
-    paint.startRendering(
-      {
-        infinite: true,
-        FPS: 60,
-        forceLoss: 0.01,
-        forceMultiplier: 0.003,
-        addForces: centerIdleMovement,
-      },
-      []
-    );
+    paint.startRendering({
+      infinite: true,
+      FPS: 60,
+      forceLoss: 0.01,
+      forceMultiplier: 0.003,
+      addForces: centerIdleMovement,
+    });
   }, []);
 
   return (
