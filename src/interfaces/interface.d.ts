@@ -48,10 +48,12 @@ export interface renderingParamsTransition {
 
 export interface renderingParamsPhysics {
   infinite: boolean;
-  iterations?: number;
-  transitionTime: number;
-  transitionInterval: number;
-  propertiesUpdater: propUpdater;
+  FPS: number;
+  seconds?: number;
+  forceLoss?: number;
+  forceMultiplier?: number;
+  addInitialForces?: forceUpdater;
+  addForces: forceUpdater;
 }
 
 export type initialPositions = (neurons: neuron[]) => void; // assigning initial positions to neurons (posX and posY

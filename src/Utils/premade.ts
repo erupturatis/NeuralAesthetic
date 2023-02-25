@@ -30,6 +30,34 @@ export const centerNeuronForce: forceUpdater = (
   }
 };
 
+export const centerIdleMovement: forceUpdater = (
+  neurons: neuron[],
+  forces: coord[],
+  iter: number
+) => {
+  // pythagorean theorem for distance between two points
+  let distance = (x1: number, y1: number, x2: number, y2: number) => {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  };
+  for (let idx: number = 0; idx < neurons.length; idx += 1) {
+    const neuron: neuron = neurons[idx];
+    if (
+      distance(
+        neuron.originalPosX,
+        neuron.originalPosY,
+        neuron.posX,
+        neuron.posY
+      ) > 5
+    ) {
+      forces[idx].x += 0.2 * (neuron.originalPosX - neuron.posX);
+      forces[idx].y += 0.2 * (neuron.originalPosY - neuron.posY);
+    } else {
+      forces[idx].x += Math.random() * 20 - 10;
+      forces[idx].y += Math.random() * 20 - 10;
+    }
+  }
+};
+
 export const additionalForces: forceUpdater = async (neurons, forces, iter) => {
   await delay(1000);
   forces[0].y += 1000;

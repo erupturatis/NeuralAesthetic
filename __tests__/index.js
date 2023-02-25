@@ -7,4 +7,5 @@ export {
   shiftNeurons,
   centerNeuronForce,
   additionalForces,
+  centerIdleMovement,
 } from "../src";

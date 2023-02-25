@@ -1,5 +1,10 @@
 import React from "react";
 import { useEffect } from "react";
+import {
+  centerIdleMovement,
+  centerNeuronForce,
+  PhysicsNetwork,
+} from "../../../index";
 
 const Ball = () => {
   useEffect(() => {
@@ -7,16 +12,21 @@ const Ball = () => {
     let paint = new PhysicsNetwork(document.querySelector("#root-svg-ball"));
     paint.arrangeInCircle({
       neurons: 10,
-      radius: 200,
+      radius: 150,
     });
     paint.addFullConnections();
 
-    paint.startRendering({
-      infinite: true,
-      transitionTime: 1000,
-      transitionInterval: 1000,
-      propertiesUpdater: shiftNeurons,
-    });
+    paint.startRendering(
+      {
+        infinite: true,
+        FPS: 60,
+        forceLoss: 0.01,
+        forceMultiplier: 0.003,
+
+        addForces: centerIdleMovement,
+      },
+      []
+    );
   }, []);
 
   return (
