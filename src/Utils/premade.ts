@@ -3,11 +3,16 @@ import {
   neuron,
   forceUpdater,
   coord,
+  connection,
 } from "../interfaces/interface";
 // contains all the premade functions
 import { delay } from "./general";
 
-export const shiftNeurons: propUpdater = (neurons: neuron[], iter: number) => {
+export const shiftNeurons: propUpdater = (
+  neurons: neuron[],
+  connections: connection[],
+  iter: number
+) => {
   let lng: number = neurons.length;
   neurons[lng - 1].newPosX = neurons[0].posX;
   neurons[lng - 1].newPosY = neurons[0].posY;

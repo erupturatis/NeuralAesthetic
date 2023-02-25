@@ -57,7 +57,11 @@ export interface renderingParamsPhysics {
 }
 
 export type initialPositions = (neurons: neuron[]) => void; // assigning initial positions to neurons (posX and posY
-export type propUpdater = (neurons: neuron[], iter: number) => void; // updating newPosX and newPosY
+export type propUpdater = (
+  neurons: neuron[],
+  connections: connection[],
+  iter: number
+) => void; // updating newPosX and newPosY
 export type forceUpdater = (
   neurons: neuron[],
   forces: coord[],

@@ -26,6 +26,7 @@ const Comp = () => {
       neurons[5].posX = 100;
       neurons[5].posY = 200;
     });
+
     paint.addConnections([
       {
         idxNeuron1: 0,

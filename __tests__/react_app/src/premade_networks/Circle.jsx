@@ -19,13 +19,13 @@ const Circle = () => {
     });
 
     paint.addFullConnections();
-
-    paint.startRendering({
-      infinite: true,
-      transitionTime: 1000,
-      transitionInterval: 1000,
-      propertiesUpdater: shiftNeurons,
-    });
+    paint.drawStaticNetwork();
+    // paint.startRendering({
+    //   infinite: true,
+    //   transitionTime: 1000,
+    //   transitionInterval: 1000,
+    //   propertiesUpdater: shiftNeurons,
+    // });
   }, []);
 
   return (

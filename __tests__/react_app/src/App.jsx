@@ -8,7 +8,7 @@ function App() {
   // later probably in this react app to run along with the normal tests
   return (
     <div className="App ">
-      <Ball />
+      <Layers />
     </div>
   );
 }

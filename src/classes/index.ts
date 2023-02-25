@@ -444,7 +444,11 @@ export class BasePainter extends Params {
 export class TransitionNetwork extends BasePainter {
   transitionTime: number = 500;
   transitionInterval: number = 2000; // the time between the transitions
-  propertiesUpdater: propUpdater = (neurons: neuron[], iter: number) => {}; // gets called to set next transition positions
+  propertiesUpdater: propUpdater = (
+    neurons: neuron[],
+    connections: connection[],
+    iter: number
+  ) => {}; // gets called to set next transition positions
 
   constructor(htmlElement: SVGSVGElement) {
     super(htmlElement);
@@ -558,7 +562,7 @@ export class TransitionNetwork extends BasePainter {
         continue;
       }
 
-      this.propertiesUpdater(this.neurons, this.iter);
+      this.propertiesUpdater(this.neurons, this.connections, this.iter);
 
       // applies the new positions
       this.applyPositions();
@@ -572,6 +576,7 @@ export class TransitionNetwork extends BasePainter {
     this.running = false;
     // write code for drawing the neurons
   }
+
   saveOriginalPositions() {
     // saves the original positions of the neurons
     for (let neuron of this.neurons) {
