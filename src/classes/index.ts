@@ -694,6 +694,11 @@ export class PhysicsNetwork extends BasePainter {
       // the new positions are calculated from the old positions and the dx and dy
       this.applyPositions();
       await delay(1000 / this.FPS);
+
+      if (this.hidden) {
+        await delay(100);
+        continue;
+      }
       this.instantTransition();
     }
     this.running = false;

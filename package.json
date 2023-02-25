@@ -9,7 +9,6 @@
     "test": "jest",
     "startReact": "cd __tests__/react_app && npm run dev"
   },
-  "homepage": "https://erupturatis.github.io/NeuralAesthetics",
   "keywords": [
     "neuralaesthetic",
     "awesome",
