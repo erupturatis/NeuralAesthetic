@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
+import { HashRouter } from "react-router-dom";
 import Layers from "./premade_networks/layers";
 import Comp from "./premade_networks/Comp";
 import Circle from "./premade_networks/circle";
@@ -10,7 +10,7 @@ import ChaoticBall from "./premade_networks/ChaoticBall";
 
 function App() {
   return (
-    <Router>
+    <HashRouter>
       <div className="App">
         <Routes>
           <Route exact path="/" element={<Entry />} />
@@ -21,7 +21,7 @@ function App() {
           <Route exact path="/circlePhysicsChaotic" element={<ChaoticBall />} />
         </Routes>
       </div>
-    </Router>
+    </HashRouter>
   );
 }
 
