@@ -38,15 +38,32 @@ export interface coord {
   y: number;
 }
 
-export interface renderingParams {
+export interface renderingParamsTransition {
   infinite: boolean;
   iterations?: number;
   transitionTime: number;
   transitionInterval: number;
   propertiesUpdater: propUpdater;
 }
+
+export interface renderingParamsPhysics {
+  infinite: boolean;
+  FPS: number;
+  seconds?: number;
+  forceLoss?: number;
+  forceMultiplier?: number;
+  addInitialForces?: forceUpdater;
+  addForces: forceUpdater;
+}
+
 export type initialPositions = (neurons: neuron[]) => void; // assigning initial positions to neurons (posX and posY
-export type propUpdater = (neurons: neuron[], iter: number) => void; // updating newPosX and newPosY
+
+export type propUpdater = (
+  neurons: neuron[],
+  connections: connection[],
+  iter: number
+) => void; // updating newPosX and newPosY
+
 export type forceUpdater = (
   neurons: neuron[],
   forces: coord[],

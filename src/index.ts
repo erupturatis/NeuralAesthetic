@@ -9,4 +9,5 @@ export {
   shiftNeurons,
   centerNeuronForce,
   additionalForces,
+  centerIdleMovement,
 } from "./Utils/premade";

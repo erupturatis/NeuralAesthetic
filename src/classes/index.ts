@@ -7,7 +7,8 @@ import {
   coord,
   propUpdater,
   forceUpdater,
-  renderingParams,
+  renderingParamsTransition,
+  renderingParamsPhysics,
   circleParams,
   initialPositions,
   connection,
@@ -237,7 +238,17 @@ export class BasePainter extends Params {
     }
   }
 
+  checkParams(params: any, mustHave: any) {
+    let missing = mustHave.filter(
+      (item: any) => !Object.keys(params).includes(item)
+    );
+    if (missing.length > 0) {
+      throw new Error(`missing params: ${missing}`);
+    }
+  }
+
   arrangeInCircle(params: circleParams) {
+    this.checkParams(params, ["neurons", "radius"]);
     // arranges neurons in a circle
     this.generateNeurons(params.neurons);
     const numNeurons = params.neurons; // The number of neurons you want to place on the circle
@@ -433,7 +444,11 @@ export class BasePainter extends Params {
 export class TransitionNetwork extends BasePainter {
   transitionTime: number = 500;
   transitionInterval: number = 2000; // the time between the transitions
-  propertiesUpdater: propUpdater = (neurons: neuron[], iter: number) => {}; // gets called to set next transition positions
+  propertiesUpdater: propUpdater = (
+    neurons: neuron[],
+    connections: connection[],
+    iter: number
+  ) => {}; // gets called to set next transition positions
 
   constructor(htmlElement: SVGSVGElement) {
     super(htmlElement);
@@ -503,7 +518,7 @@ export class TransitionNetwork extends BasePainter {
       });
   }
 
-  paramsChecker(params: renderingParams) {
+  paramsTransitionChecker(params: renderingParamsTransition) {
     if (params.infinite == false && params.iterations == undefined) {
       throw "You need to specify the number of iterations or set infinite to true";
     }
@@ -522,11 +537,11 @@ export class TransitionNetwork extends BasePainter {
     } else {
       throw "You need to specify the properties updater function";
     }
-  } // checks if the params are valid
+  } // checks if the params are valid and sets them to class
 
-  async startRendering(params: renderingParams) {
+  async startRendering(params: renderingParamsTransition) {
     // draws the initial neurons applying the properties
-    this.paramsChecker(params);
+    this.paramsTransitionChecker(params);
     this.calculateSVGSizes();
     this.checkSvgSize();
     this.drawInitialConnections();
@@ -547,7 +562,7 @@ export class TransitionNetwork extends BasePainter {
         continue;
       }
 
-      this.propertiesUpdater(this.neurons, this.iter);
+      this.propertiesUpdater(this.neurons, this.connections, this.iter);
 
       // applies the new positions
       this.applyPositions();
@@ -561,6 +576,7 @@ export class TransitionNetwork extends BasePainter {
     this.running = false;
     // write code for drawing the neurons
   }
+
   saveOriginalPositions() {
     // saves the original positions of the neurons
     for (let neuron of this.neurons) {
@@ -607,19 +623,51 @@ export class PhysicsNetwork extends BasePainter {
       force.y *= 1 - this.forceLoss;
     }
   }
+
   initializeForces() {
     for (let idx: number = 0; idx < this.neurons.length; idx++) {
-      this.forces[idx] = { x: 1000, y: 200 };
+      this.forces[idx] = { x: 0, y: 0 };
+    }
+  }
+
+  paramsPhysicsChecker(params: renderingParamsPhysics) {
+    if (params.infinite == false && params.seconds == undefined) {
+      throw "You need to specify the number of seconds or set infinite to true";
+    }
+
+    if (params.addForces != undefined) {
+      this.addForces = params.addForces;
+    } else {
+      throw "You need to specify the addForces function";
+    }
+
+    if (params.addInitialForces != undefined) {
+      this.addInitialForces = params.addInitialForces;
+    } else {
+      this.addInitialForces = (neurons, forces, iter) => {};
+    }
+
+    if (params.FPS != undefined) {
+      this.FPS = params.FPS;
+    } else {
+      throw "You need to specify the FPS";
+    }
+    if (params.forceLoss != undefined) {
+      this.forceLoss = params.forceLoss;
+    }
+    if (params.forceMultiplier != undefined) {
+      this.forceMultiplier = params.forceMultiplier;
     }
   }
 
   // render loop
-  async startRendering(iterations?: number) {
+  async startRendering(params: renderingParamsPhysics) {
     // draws the initial neurons applying the properties
+    this.paramsPhysicsChecker(params);
     this.calculateSVGSizes();
     this.checkSvgSize();
-    this.drawInitialNeurons();
     this.drawInitialConnections();
+    this.drawInitialNeurons();
     //intialization of the positionsDx and positionsDy arrays with 0 for each neuron
 
     // saving the original positions
@@ -629,9 +677,12 @@ export class PhysicsNetwork extends BasePainter {
     // dispatch initial forces (may also pe async for loops)
     this.addInitialForces(this.neurons, this.forces, this.iter);
     // starts the render loop
-    while (true && (iterations === undefined || iterations-- > 0)) {
+    while (
+      params.infinite ||
+      (params.seconds !== undefined && this.iter < params.seconds * this.FPS)
+    ) {
       if (this.hidden) {
-        await delay(200);
+        await delay(100);
         continue;
       }
       // drawing the neurons with new positions

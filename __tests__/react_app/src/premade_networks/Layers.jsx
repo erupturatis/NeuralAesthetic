@@ -12,14 +12,14 @@ const Layers = () => {
   useEffect(() => {
     let paint = new PhysicsNetwork(document.querySelector("#root-svg-layers"));
     // initial position
+
     paint.generateNeuronLayers({
-      distanceLayers: 50,
-      distanceNeurons: 50,
-      layers: [2, 3, 4, 5, 6],
+      distanceLayers: 80,
+      distanceNeurons: 40,
+      layers: [3, 3, 3],
     });
-    paint.addForces = centerNeuronForce;
-    paint.addInitialForces = additionalForces;
-    paint.startRendering();
+    // paint.neuronRadius = 10;
+    paint.drawStaticNetwork();
   }, []);
 
   return (
