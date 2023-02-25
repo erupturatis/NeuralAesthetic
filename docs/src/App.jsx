@@ -10,8 +10,8 @@ import ChaoticBall from "./premade_networks/ChaoticBall";
 
 function App() {
   return (
-    <div className="App">
-      <Router>
+    <Router>
+      <div className="App">
         <Routes>
           <Route exact path="/" element={<Entry />} />
           <Route exact path="/layerTransition" element={<Layers />} />
@@ -20,8 +20,8 @@ function App() {
           <Route exact path="/circlePhysicsJiggle" element={<Ball />} />
           <Route exact path="/circlePhysicsChaotic" element={<ChaoticBall />} />
         </Routes>
-      </Router>
-    </div>
+      </div>
+    </Router>
   );
 }
 
