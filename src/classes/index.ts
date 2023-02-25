@@ -7,7 +7,8 @@ import {
   coord,
   propUpdater,
   forceUpdater,
-  renderingParams,
+  renderingParamsTransition,
+  renderingParamsPhysics,
   circleParams,
   initialPositions,
   connection,
@@ -237,7 +238,17 @@ export class BasePainter extends Params {
     }
   }
 
+  checkParams(params: any, mustHave: any) {
+    let missing = mustHave.filter(
+      (item: any) => !Object.keys(params).includes(item)
+    );
+    if (missing.length > 0) {
+      throw new Error(`missing params: ${missing}`);
+    }
+  }
+
   arrangeInCircle(params: circleParams) {
+    this.checkParams(params, ["neurons", "radius"]);
     // arranges neurons in a circle
     this.generateNeurons(params.neurons);
     const numNeurons = params.neurons; // The number of neurons you want to place on the circle
@@ -503,7 +514,7 @@ export class TransitionNetwork extends BasePainter {
       });
   }
 
-  paramsChecker(params: renderingParams) {
+  paramsChecker(params: renderingParamsTransition) {
     if (params.infinite == false && params.iterations == undefined) {
       throw "You need to specify the number of iterations or set infinite to true";
     }
@@ -522,9 +533,9 @@ export class TransitionNetwork extends BasePainter {
     } else {
       throw "You need to specify the properties updater function";
     }
-  } // checks if the params are valid
+  } // checks if the params are valid and sets them to class
 
-  async startRendering(params: renderingParams) {
+  async startRendering(params: renderingParamsTransition) {
     // draws the initial neurons applying the properties
     this.paramsChecker(params);
     this.calculateSVGSizes();
@@ -607,9 +618,10 @@ export class PhysicsNetwork extends BasePainter {
       force.y *= 1 - this.forceLoss;
     }
   }
+
   initializeForces() {
     for (let idx: number = 0; idx < this.neurons.length; idx++) {
-      this.forces[idx] = { x: 1000, y: 200 };
+      this.forces[idx] = { x: 0, y: 0 };
     }
   }
 
