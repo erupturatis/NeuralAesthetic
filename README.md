@@ -52,13 +52,11 @@ NeuralAesthetics is a JavaScript library for creating neural networks on web pag
 - Use the premade functions and modify the examples for easy eye catching neural networks
 - Customize your neural networks and their motion as much as you want
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ### Powered by:
 
 [![d3js logo](https://d3js.org/logo.svg)](https://d3js.org/)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 
@@ -425,7 +423,60 @@ This method runs a render loop to update the positions of nodes and edges by app
 
 ### Premade Forces functions
 
+#### centerNeuronForce
+
+This function is a pre-made force updater that can be passed as the addForces parameter to the `startRendering` function in the params object. It applies a force to each neuron that pulls it towards the center of the network
+
+```
+    paint.startRendering(
+      {
+        infinite: true,
+        FPS: 60,
+        forceLoss: 0.01,
+        forceMultiplier: 0.003,
+        addForces: centerNeuronForce,
+      },
+      []
+    );
+```
+
+Definition
+
+```typescript
+export const centerNeuronForce: forceUpdater = (
+  neurons: neuron[],
+  forces: coord[],
+  iter: number
+) => {
+  for (let idx: number = 0; idx < neurons.length; idx += 1) {
+    const neuron: neuron = neurons[idx];
+    forces[idx].x += neuron.originalPosX - neuron.posX;
+    forces[idx].y += neuron.originalPosY - neuron.posY;
+  }
+};
+```
+
+#### centerIdleMovement
+
+This function is a pre-made force updater that can be passed as a parameter to the `startRendering` function of the Forces Network. It applies a force to each neuron that pulls it towards the center of the network, and adds a random movement if the neuron is too close to its original position. You will see in examples how it works
+
 ### Custom forces parameters
+
+The `addForces` parameter is a required function that modifies forces to the neurons at each iteration of the render loop. It takes in the following parameters:
+
+- `neurons` (required): An array of neuron objects.
+- `forces` (required): An array of force vectors. This is the array you are supposed to modify for the next frame
+- `iter` (required): The current iteration of the render loop.
+
+The `addForces` function should modify the `forces` array to apply forces to the neurons. For example, you could add repulsive forces between neurons to keep them from overlapping or add attractive forces between connected neurons to keep them close together.
+
+The `addInitialForces` parameter is an optional function that adds initial forces to the neurons when the render loop starts. It takes in the same parameters as the `addForces` function:
+
+- `neurons` (required): An array of neuron objects.
+- `forces` (required): An array of force vectors.
+- `iter` (required): The current iteration of the render loop.
+
+The `addInitialForces` function can be used to set up the initial state of the network before the render loop begins. For example, you could use it to randomly push the neurons or add a gravitational force that pulls all the neurons towards the center of the network.
 
 ## Examples
 
@@ -444,4 +495,4 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>

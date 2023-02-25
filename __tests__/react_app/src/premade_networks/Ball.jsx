@@ -22,7 +22,6 @@ const Ball = () => {
         FPS: 60,
         forceLoss: 0.01,
         forceMultiplier: 0.003,
-
         addForces: centerIdleMovement,
       },
       []
