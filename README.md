@@ -149,7 +149,7 @@ As I said in usage there are 2 premade positioning types and a way to make any c
 
 ### Layer Positioning
 
-The `generateNeuronLayers` function arranges the neurons in layers with a specified number of neurons per layer. The function takes a set of parameters that define the distance between the neurons and the layers, as well as the number of neurons in each layer.
+The `generateNeuronLayers` function arranges the neurons in layers with a specified number of neurons per layer. The function takes a set of parameters that define the distance between the neurons and the layers, as well as the number of neurons in each layer. The function will also add a layer flag on each neuron to be easier to identify if we want to add connections for example
 
 ### Parameters
 

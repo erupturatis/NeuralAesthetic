@@ -1,8 +1,17 @@
-#root {
-  background-color: rgb(2, 6, 15);
-  background-color: aliceblue;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+body {
+  background-color: aliceblue;
+  background-color: rgb(2, 6, 15);
+}
+h1 {
+  color: rgb(255, 255, 255);
+}
+div {
+  color: rgb(255, 255, 255);
+}
 .full-size {
   width: 100%;
   height: 100%;
