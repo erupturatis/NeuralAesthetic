@@ -37,6 +37,7 @@
     - [Parameters](#parameters-1)
     - [Premade Forces Functions](#premade-forces-functions)
     - [Custom Forces Parameters](#custom-forces-parameters)
+  - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -142,7 +143,7 @@ paint.arrangeCustom(6, (neurons) => { // an example of a custom arrangement func
 - You can also add [connections](#connections)
   -Now the `TransitionNetwork` and `PhysicsNetwork` begin to differ in the rendering methods - [Rendering the `TransitionNetwork`](#transition-network-rendering) - [Rendering the `PhysicsNetwork`](#physics-network-rendering)
 
-## Documentation
+# Documentation
 
 ## Positioning
 
@@ -150,18 +151,18 @@ As I said in usage there are 2 premade positioning types and a way to make any c
 
 ### Layer Positioning
 
-The `layerPositioning` function arranges the neurons in layers with a specified number of neurons per layer. The function takes a set of parameters that define the distance between the neurons and the layers, as well as the number of neurons in each layer.
+The `generateNeuronLayers` function arranges the neurons in layers with a specified number of neurons per layer. The function takes a set of parameters that define the distance between the neurons and the layers, as well as the number of neurons in each layer.
 
-#### Parameters
+### Parameters
 
 - `params: layerParams` - An object containing the following properties:
   - `distanceNeurons: number` - The distance between neurons.
   - `distanceLayers: number` - The distance between layers.
   - `layers: number[]` - An array containing the number of neurons in each layer.
 
-#### Examples
+### Examples
 
-Here are some examples of how to use the `layerPositioning` function:
+Here are some examples of how to use the `generateNeuronLayers` function:
 
 ```typescript
 // Example 1: Create 4 layers of 2, 4, 6, and 8 neurons with a distance of 50 between neurons and 100 between layers
@@ -218,7 +219,43 @@ paint.arrangeInCircle({
 });
 ```
 
-#### Custom Positioning
+### Custom Positioning
+
+The `arrangeCustom` function arranges the neurons in a custom arrangement defined by the user. The function takes a set of parameters that define the number of neurons to arrange and a callback function that sets the initial positions of the neurons in the custom arrangement.
+
+### Parameters
+
+- `numNeurons: number` - The number of neurons to arrange in the custom arrangement.
+- `customArrangement: initialPositions` - A callback function that sets the initial positions of the neurons in the custom arrangement.
+
+### How it works
+
+The `arrangeCustom` function generates the specified number of neurons using the `generateNeurons` method. It then calls the `customArrangement` callback function, which sets the initial positions of the neurons in the custom arrangement.
+
+The `customArrangement` function takes an array of `neuron` objects as its argument. It can set the `posX` and `posY` properties of each `neuron` object to specify its initial position in the custom arrangement.
+
+Here's an example of how to use the `arrangeCustom` function to create a custom arrangement of 6 neurons:
+
+```typescript
+paint.arrangeCustom(6, (neurons) => {
+  neurons[0].posX = 0;
+  neurons[0].posY = 0;
+  neurons[1].posX = 0;
+  neurons[1].posY = 100;
+  neurons[2].posX = 0;
+  neurons[2].posY = 200;
+  neurons[3].posX = 100;
+  neurons[3].posY = 0;
+  neurons[4].posX = 100;
+  neurons[4].posY = 100;
+  neurons[5].posX = 100;
+  neurons[5].posY = 200;
+});
+```
+
+In this example, a custom arrangement of 6 neurons is created using the arrangeCustom function. The customArrangement callback function sets the initial positions of the neurons to create a 3x2 grid of neurons.(this example can also be done with generateNeuronLayer)
+
+Note that the arrangeCustom function can be used to create any custom arrangement of neurons, as long as the customArrangement callback function sets the initial positions of the neurons in the desired arrangement.
 
 ### Neurons Properties
 
@@ -309,24 +346,88 @@ let paint = new TransitionNetwork(document.querySelector("#root-svg-comp"));
       },
     ]);// will work since arrangeCustom generates 6 neurons with indexes from 0 to 5.
     //If you try to connect an index bigger than 5 the program will crash
-
 ```
 
-### Transition Network Rendering
+## Transition Network Rendering
+
+#### Function: `startRendering` for Transition Network
+
+The `startRendering` function starts the rendering of the transition network by drawing the initial neurons and connections and applying the specified properties. The function takes a set of parameters that define how the rendering should behave.
+
+### Parameters
+
+- `params: renderingParamsTransition` - An object that specifies the rendering parameters for the transition network.
+
+  - `infinite: boolean` - A flag indicating whether the rendering should be infinite or not. If set to `true`, the rendering will continue indefinitely
+  - `iterations?: number` - The number of iterations to perform if `infinite` is set to `false`. If set to `undefined` and `infinite` is set to `false`, an error will be thrown.
+  - `transitionTime: number` - The duration of the transition animation for the neurons, in milliseconds.
+  - `transitionInterval: number` - The interval between each transition step, in milliseconds.
+  - `propertiesUpdater: propUpdater` - A callback function that updates the properties of the neurons and connections at each iteration of the rendering. This is a required parameter and an error will be thrown if it is not provided.
+  - Note that this function is asynchronous
+
+### How it works
+
+The function draws the inital neurons and connections (if any) . Then the function starts the rendering loop, which applies the `propertiesUpdater` callback function to update the properties of the neurons and connections at each iteration then pauses for the `transitionInterval` in ms . The loop continues until either the specified number of `iterations` is reached or `infinite` is set to `true`.
+
+### Premade transition functions
+
+#### function: `shiftNeurons`
+
+The `shiftNeurons` function is a premade function that can be passed as a callback to the `startRendering` function for the transition network. It updates the positions of the neurons to shift them in a circular fashion, with the last neuron moving to the position of the first neuron, and all other neurons shifting down by one position.
 
 #### Parameters
 
-#### Premade transition functions
+- `neurons: neuron[]` - An array of neurons representing the current state of the network.
+- `connections: connection[]` - An array of connections representing the current state of the network.
+- `iter: number` - The current iteration number of the rendering loop.
 
-#### Custom transition parameters
+### How it works
 
-### Physics Network Rendering
+The `shiftNeurons` function updates the `newPosX` and `newPosY` properties of the neurons to shift them in a circular fashion. The last neuron in the array is moved to the position of the first neuron, and all other neurons are shifted down by one position. The function does not update the `posX` and `posY` properties directly, as those are used to store the current positions of the neurons during the rendering loop.
 
-#### Parameters
+### Custom transition parameters
 
-#### Premade Forces functions
+The `propUpdater` type is a callback function type that can be used as a custom properties updater in the `renderingParamsTransition` parameter of the `startRendering` function for the transition network. It takes three parameters:
 
-#### Custom forces parameters
+- `neurons: neuron[]` - An array of neurons representing the current state of the network.
+- `connections: connection[]` - An array of connections representing the current state of the network.
+- `iter: number` - The current iteration number of the rendering loop.
+
+The `propUpdater` function should update the `newPosX` and `newPosY` properties of the neurons to reflect their new positions. The other properties like `bgColor` and such can be transition normally to the new desired state.These properties are used during the rendering loop to animate the transition from the old positions to the new positions.
+
+## Physics Network Rendering
+
+#### Function: `startRendering` for PhysicsNetwork
+
+The `startRendering` function starts the rendering of the transition network by drawing the initial neurons and connections and applying the specified properties. The function takes a set of parameters that define how the rendering should behave.
+
+### Parameters
+
+- `params` (required): An object that contains the following properties:
+  - `infinite`: A boolean value that determines if the render loop should run indefinitely.
+  - `FPS`: A number that specifies the frames per second for rendering.
+  - `seconds` (optional): A number that specifies the duration of the render loop in seconds if infinite is set to false
+  - `forceLoss` (optional): A number that specifies the amount of force loss between each frame (a force of 100 and a force loss of 0.1 would mean the forces is decreased by 0.1 each frame, becoming 90 after 1 frame)
+  - Here it should be noted that this is a "pseudo physics engine", so it tries to simulate the result of a physics engine.
+  - `forceMultiplier` (optional): A number that specifies the force multiplier when calculating the new Position at each frame for each neuron. A force multiplier of 0.1 and a force on the x axis of 50 and on y axis of 100 will move the neuron in the next frame with 5 on x axis and 10 on y axis. Additionally if forceLoss is not 0, the force will decrease and so will the neuron movement in a smooth way.
+  - `addInitialForces` (optional): A function that adds initial forces for the neurons
+  - `addForces` (required): A function that adds forces to the neurons at each frame. Adding small ammount of forces at each frame can simulate something like acceleration or random movement. This should be paired with the other parameters to get the desired effect
+
+#### Render Loop
+
+This method runs a render loop to update the positions of nodes and edges by applying forces to them. The render loop performs the following steps:
+
+- Initializes the forces and dispatches initial forces to the neurons.
+- Starts the render loop which continues until either the duration of the loop is over or `infinite` is true.
+- Uses the custom AddForce function if provided to modify the current forces in a desired manner
+- Applies the forces to the neurons and calculates the new positions of the neurons in the way I described earlier
+- Waits for 1000 / `FPS` milliseconds and continues the loop.
+
+### Premade Forces functions
+
+### Custom forces parameters
+
+## Examples
 
 <!-- CONTRIBUTING -->
 
